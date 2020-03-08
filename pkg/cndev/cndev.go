@@ -30,6 +30,31 @@ type Device struct {
 	Path string
 }
 
+type DeviceMemory struct {
+	Used *uint64
+	Free *uint64
+}
+
+type UtilizationInfo struct {
+	Board *uint
+}
+
+type DeviceStatus struct {
+	Memory      DeviceMemory
+	Utilization UtilizationInfo
+}
+
+type ProcessInfo struct {
+	Pid                uint
+	PhysicalMemoryUsed uint64
+}
+
+func assert(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Init() error {
 	return cndevInit()
 }
@@ -63,6 +88,37 @@ func NewDeviceLite(idx uint) (device *Device, err error) {
 
 func (d *Device) DeviceHealthCheckState(delayTime int) (int, error) {
 	return d.handle.deviceHealthCheckState(delayTime)
+}
+
+func (d *Device) DeviceAllRunningProcessInfo() []ProcessInfo {
+	pids, mems, err := d.handle.deviceProcessInfo()
+	assert(err)
+
+	processInfos := []ProcessInfo{}
+	for i := 0; i < len(pids); i++ {
+		p := ProcessInfo{
+			Pid:                pids[i],
+			PhysicalMemoryUsed: mems[i],
+		}
+		processInfos = append(processInfos, p)
+	}
+	return processInfos
+}
+
+func (d *Device) Status() (status *DeviceStatus, err error) {
+	board_u, err := d.handle.deviceGetBoardUtilization()
+	assert(err)
+
+	_, devMem, err := d.handle.deviceGetMemoryInfo()
+	assert(err)
+
+	status = &DeviceStatus{
+		Memory: devMem,
+		Utilization: UtilizationInfo{
+			Board: board_u,
+		},
+	}
+	return
 }
 
 func Shutdown() error {

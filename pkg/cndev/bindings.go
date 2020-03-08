@@ -32,6 +32,12 @@ import (
 	"time"
 )
 
+const (
+	VERSION = 3
+
+	szProcs = 32
+)
+
 type handle struct {
 	UUID  string
 	MINOR uint
@@ -76,7 +82,7 @@ func deviceGetCount() (uint, error) {
 
 func deviceGetCardName(devId uint) (C.cndevNameEnum_t, error) {
 	var cardName C.cndevCardName_t
-	cardName.version = C.int(3)
+	cardName.version = C.int(VERSION)
 	r := C.cndevGetCardName(&cardName, C.int(devId))
 	cardType := cardName.id
 	return cardType, errorString(r)
@@ -85,7 +91,7 @@ func deviceGetCardName(devId uint) (C.cndevNameEnum_t, error) {
 func deviceGetCardSN(devId uint) (C.cndevCardSN_t, error) {
 	var cardSN C.cndevCardSN_t
 
-	cardSN.version = C.int(3)
+	cardSN.version = C.int(VERSION)
 	r := C.cndevGetCardSN(&cardSN, C.int(devId))
 
 	return cardSN, errorString(r)
@@ -139,15 +145,72 @@ func (h handle) deviceGetPath() (string, error) {
 	return h.PATH, errorString(ret)
 }
 
+//cndevRet_t cndevGetCardHealthState(cndevCardHealthState_t* cardHealthState, int devId);
 func (h handle) deviceHealthCheckState(delayTime int) (int, error) {
 	var ret C.cndevRet_t
 	var cardHealthState C.cndevCardHealthState_t
 	var healthCode int
-	cardHealthState.version = C.int(3)
+	cardHealthState.version = C.int(VERSION)
 	devId := C.int(h.MINOR)
 	// sleep some seconds
 	time.Sleep(time.Duration(delayTime) * time.Second)
 	ret = C.cndevGetCardHealthState(&cardHealthState, devId)
 	healthCode = int(cardHealthState.health)
 	return healthCode, errorString(ret)
+}
+
+//cndevRet_t cndevGetMemoryUsage(cndevMemoryInfo_t *memInfo, int devId);
+func (h handle) deviceGetMemoryInfo() (totalMem *uint64, devMem DeviceMemory, err error) {
+	var ret C.cndevRet_t
+	var cndevMemoryInfo C.cndevMemoryInfo_t
+	cndevMemoryInfo.version = C.int(VERSION)
+	devId := C.int(h.MINOR)
+	ret = C.cndevGetMemoryUsage(&cndevMemoryInfo, devId)
+	totalMem = uint64Ptr(cndevMemoryInfo.PhysicalMemoryTotal)
+	usedMem := uint64Ptr(cndevMemoryInfo.PhysicalMemoryUsed)
+	freeMem := *totalMem - *usedMem
+	devMem = DeviceMemory{
+		Used: usedMem,
+		Free: &freeMem,
+	}
+	return totalMem, devMem, errorString(ret)
+}
+
+//cndevRet_t cndevGetDeviceUtilizationInfo(cndevUtilizationInfo_t *utilInfo, int devId);
+func (h handle) deviceGetBoardUtilization() (u *uint, err error) {
+	var ret C.cndevRet_t
+	var cndevUtilizationInfo C.cndevUtilizationInfo_t
+	cndevUtilizationInfo.version = C.int(VERSION)
+	devId := C.int(h.MINOR)
+	ret = C.cndevGetDeviceUtilizationInfo(&cndevUtilizationInfo, devId)
+	u = uintPtr(cndevUtilizationInfo.BoardUtilization)
+	return u, errorString(ret)
+}
+
+//cndevRet_t cndevGetProcessInfo(unsigned *infoCount, cndevProcessInfo_t *procInfo, int devId);
+func (h handle) deviceProcessInfo() ([]uint, []uint64, error) {
+	var ret C.cndevRet_t
+	var cndevProcessInfo [szProcs]C.cndevProcessInfo_t
+	var infoCount = C.uint(szProcs)
+	cndevProcessInfo[0].version = C.int(VERSION)
+	devId := C.int(h.MINOR)
+	ret = C.cndevGetDeviceUtilizationInfo(infoCount, &cndevProcessInfo[0], devId)
+	n := int(szProcs)
+	pids := make([]uint, n)
+	mems := make([]uint64, n)
+	for i := 0; i < n; i++ {
+		pids[i] = uint(cndevProcessInfo[i].pid)
+		// convert to MB
+		mems[i] = uint64(cndevProcessInfo[i].PhysicalMemoryUsed)/1024
+	}
+	return pids, mems, errorString(ret)
+}
+
+func uint64Ptr(c C.uint64) *uint64 {
+	i := uint64(c)
+	return &i
+}
+func uintPtr(c C.int) *uint {
+	i := uint(c)
+	return &i
 }
