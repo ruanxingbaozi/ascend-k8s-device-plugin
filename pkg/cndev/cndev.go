@@ -46,6 +46,7 @@ type DeviceStatus struct {
 
 type ProcessInfo struct {
 	Pid                uint
+	Command            string
 	PhysicalMemoryUsed uint64
 }
 
@@ -90,14 +91,20 @@ func (d *Device) DeviceHealthCheckState(delayTime int) (int, error) {
 	return d.handle.deviceHealthCheckState(delayTime)
 }
 
-func (d *Device) DeviceAllRunningProcessInfo() []ProcessInfo {
+func (d *Device) DeviceAllRunningProcessInfo() []*ProcessInfo {
 	pids, mems, err := d.handle.deviceProcessInfo()
 	assert(err)
 
-	processInfos := []ProcessInfo{}
+	processInfos := []*ProcessInfo{}
 	for i := 0; i < len(pids); i++ {
-		p := ProcessInfo{
+		name, err := processName(pids[i])
+
+		if err != nil {
+			return processInfos
+		}
+		p := &ProcessInfo{
 			Pid:                pids[i],
+			Command:            name,
 			PhysicalMemoryUsed: mems[i],
 		}
 		processInfos = append(processInfos, p)

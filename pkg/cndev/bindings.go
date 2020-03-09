@@ -29,6 +29,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -194,7 +198,7 @@ func (h handle) deviceProcessInfo() ([]uint, []uint64, error) {
 	var infoCount = C.uint(szProcs)
 	cndevProcessInfo[0].version = C.int(VERSION)
 	devId := C.int(h.MINOR)
-	ret = C.cndevGetDeviceUtilizationInfo(infoCount, &cndevProcessInfo[0], devId)
+	ret = C.cndevGetProcessInfo(&infoCount, &cndevProcessInfo[0], devId)
 	n := int(szProcs)
 	pids := make([]uint, n)
 	mems := make([]uint64, n)
@@ -206,7 +210,25 @@ func (h handle) deviceProcessInfo() ([]uint, []uint64, error) {
 	return pids, mems, errorString(ret)
 }
 
-func uint64Ptr(c C.uint64) *uint64 {
+func processName(pid uint) (string, error) {
+
+	f := `/proc/` + strconv.FormatUint(uint64(pid), 10) + `/comm`
+	d, err := ioutil.ReadFile(f)
+
+	if err != nil {
+		if pid == 0{
+			return "", err
+		}
+		// TOCTOU: process terminated
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	return strings.TrimSuffix(string(d), "\n"), err
+}
+
+func uint64Ptr(c C.long) *uint64 {
 	i := uint64(c)
 	return &i
 }
