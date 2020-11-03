@@ -30,7 +30,7 @@ import (
 
 func TestCambriconDevicePlugin_Allocate(t *testing.T) {
 	m := &CambriconDevicePlugin{
-		devsMap: []*cndev.Device{
+		devsMap: []*dcmi.Device{
 			{
 				UUID: "MLU-testdevice-sn0001",
 				Path: "/dev/cambricon_c10Dev0",
@@ -113,7 +113,7 @@ func TestCambriconDevicePlugin_Allocate(t *testing.T) {
 	}
 
 	m = &CambriconDevicePlugin{
-		devsMap: []*cndev.Device{
+		devsMap: []*dcmi.Device{
 			{
 				UUID: "MLU-testdevice-sn0001",
 				Path: "/dev/cambricon_dev0",

@@ -38,7 +38,7 @@ static void *handle;
 
 cndevRet_t CNDEV_DL(cndevInit)(void)
 {
-    handle = dlopen("libcndev.so", RTLD_LAZY | RTLD_GLOBAL);
+    handle = dlopen("libdcmi.so", RTLD_LAZY | RTLD_GLOBAL);
     if (handle == NULL) {
         return (CNDEV_ERROR_UNINITIALIZED);
     }

@@ -44,7 +44,7 @@ const (
 type CambriconDevicePlugin struct {
 	devs    []*pluginapi.Device
 	socket  string
-	devsMap []*cndev.Device
+	devsMap []*dcmi.Device
 	stop    chan interface{}
 	health  chan *pluginapi.Device
 

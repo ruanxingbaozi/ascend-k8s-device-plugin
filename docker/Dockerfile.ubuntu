@@ -20,6 +20,6 @@ RUN export CGO_LDFLAGS_ALLOW='-Wl,--unresolved-symbols=ignore-in-object-files' &
 
 FROM ubuntu:16.04
 
-COPY libcndev.so /usr/lib
+COPY libdcmi.so /usr/lib
 COPY --from=build /go/bin/cambricon-k8s-device-plugin /usr/bin/k8s-device-plugin
 CMD ["k8s-device-plugin"]

@@ -33,12 +33,12 @@ import (
 
 func main() {
 	log.Println("Loading CNDEV")
-	if err := cndev.Init(); err != nil {
+	if err := dcmi.Init(); err != nil {
 		log.Printf("Failed to initialize CNDEV: %s.", err)
 
 		select {}
 	}
-	defer func() { log.Println("Shutdown of CNDEV returned:", cndev.Shutdown()) }()
+	defer func() { log.Println("Shutdown of CNDEV returned:", dcmi.Shutdown()) }()
 
 	log.Println("Fetching devices.")
 	if len(getDevices()) == 0 {

@@ -20,7 +20,7 @@ RUN export CGO_LDFLAGS_ALLOW='-Wl,--unresolved-symbols=ignore-in-object-files' &
 
 FROM ubuntu:16.04
 COPY --from=build /go/bin/cambricon-k8s-device-plugin /k8s-device-plugin
-COPY pkg/cndev/mock/libcndev.so /usr/lib
+COPY pkg/cndev/mock/libdcmi.so /usr/lib
 COPY test/mock.json /
 WORKDIR /
 

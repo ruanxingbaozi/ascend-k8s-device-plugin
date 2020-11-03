@@ -2,22 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/cambricon/cambricon-k8s-device-plugin/pkg/cndev"
+	"github.com/cambricon/cambricon-k8s-device-plugin/pkg/dcmi"
 	"log"
 	"os"
 )
 
 func main() {
-	if err := cndev.Init(); err != nil {
+	if err := dcmi.Init(); err != nil {
 		log.Printf("Failed to initialize CNDEV: %s.", err)
 		os.Exit(1)
 	}
-	n, err := cndev.GetDeviceCount()
+	n, err := dcmi.GetDeviceCount()
 	if err != nil {
 		fmt.Println(err)
 	}
 	for i := uint(0); i < n; i++ {
-		d, err := cndev.NewDeviceLite(i)
+		d, err := dcmi.NewDeviceLite(i)
 		status, err := d.Status()
 		fmt.Printf("(%v/%v)/%v\n", *status.Memory.Used, *status.Memory.Free, *status.Utilization.Board)
 
@@ -32,5 +32,5 @@ func main() {
 
 	}
 
-	cndev.Shutdown()
+	dcmi.Shutdown()
 }

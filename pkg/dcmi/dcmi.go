@@ -18,7 +18,7 @@
  * THE SOFTWARE.
  *************************************************************************/
 
-package cndev
+package dcmi
 
 // #include "cndev_dl.h"
 import "C"

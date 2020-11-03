@@ -8,7 +8,7 @@ else
   rm -rf "$curpath/image/*"
 fi
 
-cndev_path="/usr/local/neuware/lib64/libcndev.so"
+cndev_path="/usr/local/dcmi/libdcmi.so"
 if [ ! -f $cndev_path ]; then
         echo "Dependency check failed, please install Cambricon neuware!"
         exit 1
@@ -24,4 +24,4 @@ docker build -t  cambricon-k8s-device-plugin:v1.0.0  -f Dockerfile  .
 echo "Saving Cambricon device plugin docker image."
 docker save -o "$curpath/image/cambricon_device_plugin_ubuntu.tar cambricon-k8s-device-plugin:v1.0.0"
 
-rm -rf "$curpath/libcndev.so"
+rm -rf "$curpath/libdcmi.so"

@@ -49,12 +49,12 @@ func check(err error) {
 }
 
 func getDevices() []*pluginapi.Device {
-	n, err := cndev.GetDeviceCount()
+	n, err := dcmi.GetDeviceCount()
 	check(err)
 
 	var devs []*pluginapi.Device
 	for i := uint(0); i < n; i++ {
-		d, err := cndev.NewDeviceLite(i)
+		d, err := dcmi.NewDeviceLite(i)
 		check(err)
 		devs = append(devs, &pluginapi.Device{
 			ID:     d.UUID,
@@ -65,13 +65,13 @@ func getDevices() []*pluginapi.Device {
 	return devs
 }
 
-func getDevicesAndMap() ([]*pluginapi.Device, []*cndev.Device) {
-	n, err := cndev.GetDeviceCount()
+func getDevicesAndMap() ([]*pluginapi.Device, []*dcmi.Device) {
+	n, err := dcmi.GetDeviceCount()
 	check(err)
-	var devsMap []*cndev.Device
+	var devsMap []*dcmi.Device
 	var devs []*pluginapi.Device
 	for i := uint(0); i < n; i++ {
-		d, err := cndev.NewDeviceLite(i)
+		d, err := dcmi.NewDeviceLite(i)
 		check(err)
 		devsMap = append(devsMap, d)
 		devs = append(devs, &pluginapi.Device{
@@ -96,7 +96,7 @@ func isMLU270Device(devPath string) bool {
 	return strings.HasPrefix(devPath, mlu270DeviceName)
 }
 
-func watchUnhealthy(ctx context.Context, devs []*pluginapi.Device, devsMap []*cndev.Device, unhealthy chan<- *pluginapi.Device) {
+func watchUnhealthy(ctx context.Context, devs []*pluginapi.Device, devsMap []*dcmi.Device, unhealthy chan<- *pluginapi.Device) {
 	var ifSupportHealthCheck = true
 	for {
 		select {

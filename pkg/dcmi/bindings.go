@@ -18,7 +18,7 @@
  * THE SOFTWARE.
  *************************************************************************/
 
-package cndev
+package dcmi
 
 // #cgo CFLAGS: -I ./
 // #cgo LDFLAGS: -ldl -Wl,--unresolved-symbols=ignore-in-object-files
