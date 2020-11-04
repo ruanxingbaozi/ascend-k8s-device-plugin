@@ -30,12 +30,6 @@ import (
 	"fmt"
 )
 
-const (
-	VERSION = 3
-
-	szProcs = 32
-)
-
 type handle struct {
 	UUID  string
 	MINOR uint
@@ -46,9 +40,13 @@ func errorString(ret C.dcmiRet_t) error {
 	if ret == C.DCMI_SUCCESS {
 		return nil
 	}
-	// todo dcmi error info func 参数不匹配
-	//err := C.GoString(C.cndevGetErrorString(ret))
 	return fmt.Errorf("dcmi: %v", ret)
+}
+func errorStringDcmi(ret C.int) error {
+	if ret == C.DCMI_SUCCESS {
+		return nil
+	}
+	return fmt.Errorf("dcmi error: %v", ret)
 }
 
 func init_() error {
@@ -73,18 +71,45 @@ func Release() error {
 }
 
 //int dcmi_get_card_num_list(int *card_num, int *card_list, int list_length);
-func deviceGetCount() (uint, error) {
-	ret := C.int(0)
+func cardGetList() ([]uint, error) {
 	card_num := C.int(0)
 	var card_list [8]C.int
-	ret = C.dcmi_get_card_num_list(&card_num, &card_list[0], C.int(len(card_list)))
-	if ret != 0 {
-		fmt.Errorf("get card num list failed")
+	ret := C.dcmi_get_card_num_list(&card_num, &card_list[0], C.int(len(card_list)))
+	cards := []uint{}
+	for _, c := range card_list {
+		cards = append(cards, uint(c))
 	}
-	fmt.Printf("card list: %v\n", card_list)
-	fmt.Println("*******************")
-	// card list: [0 1 2 3 4 5 6 7 0 0]
-	return 0, nil
+	return cards, errorStringDcmi(ret)
+}
+
+//int dcmi_get_device_num_in_card(int card_id, int *device_num);
+func deviceInCard(cardId uint) (uint, error) {
+	card_id := C.int(cardId)
+	device_num := C.int(0)
+	ret := C.dcmi_get_device_num_in_card(card_id, &device_num)
+	return uint(device_num), errorStringDcmi(ret)
+}
+
+//int dcmi_get_hbm_info(int card_id, int device_id, struct dsmi_hbm_info_stru *pdevice_hbm_info);
+func deviceGetHBMInfo(cardId uint) (DeviceMemory, error) {
+	card_id := C.int(cardId)
+	device_id := C.int(0)
+	var device_hbm_info C.struct_dsmi_hbm_info_stru
+	ret := C.dcmi_get_hbm_info(card_id, device_id, &device_hbm_info)
+	deviceMem := DeviceMemory{
+		Used: ulong64Ptr(device_hbm_info.memory_usage),
+		Free: ulong64Ptr(device_hbm_info.memory_size - device_hbm_info.memory_usage),
+	}
+	return deviceMem, errorStringDcmi(ret)
+}
+
+//int dcmi_get_device_health(int card_id, int device_id, unsigned int *phealth);
+func deviceGetHealth(cardId uint) (uint, error) {
+	card_id := C.int(cardId)
+	device_id := C.int(0)
+	health := C.uint(0)
+	ret := C.dcmi_get_device_health(card_id, device_id, &health)
+	return uint(health), errorStringDcmi(ret)
 }
 
 //func deviceGetCardName(devId uint) (C.cndevNameEnum_t, error) {
@@ -230,7 +255,10 @@ func deviceGetCount() (uint, error) {
 //	}
 //	return strings.TrimSuffix(string(d), "\n"), err
 //}
-
+func ulong64Ptr(c C.ulong) *uint64 {
+	i := uint64(c)
+	return &i
+}
 func uint64Ptr(c C.long) *uint64 {
 	i := uint64(c)
 	return &i

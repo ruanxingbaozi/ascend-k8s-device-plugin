@@ -54,8 +54,18 @@ func Init() error {
 	return dcmiInit()
 }
 
-func GetDeviceCount() (uint, error) {
-	return deviceGetCount()
+func GetCardList() ([]uint, error) {
+	return cardGetList()
+}
+
+func GetDeviceInCard(cardId uint) (uint, error) {
+	return deviceInCard(cardId)
+}
+func GetDeviceHBMInfo(cardId uint) (DeviceMemory, error) {
+	return deviceGetHBMInfo(cardId)
+}
+func GetDeviceHealth(cardId uint) (uint, error) {
+	return deviceGetHealth(cardId)
 }
 
 //func NewDeviceLite(idx uint) (device *Device, err error) {

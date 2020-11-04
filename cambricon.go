@@ -21,7 +21,7 @@
 package main
 
 import (
-	"github.com/cambricon/cambricon-k8s-device-plugin/pkg/cndev"
+	"github.com/cambricon/cambricon-k8s-device-plugin/pkg/dcmi"
 	"golang.org/x/net/context"
 	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
 	"log"
@@ -41,6 +41,10 @@ const (
 	mlu270DeviceName        = "/dev/cambricon_dev"
 	mlu270COMMUDeviceName   = "/dev/commu"
 )
+const (
+	ascendInstallName = "/etc/ascend_install.info"
+	ascendDriverVersionName = "/usr/local/Ascend/driver/version.info"
+)
 
 func check(err error) {
 	if err != nil {
@@ -49,33 +53,32 @@ func check(err error) {
 }
 
 func getDevices() []*pluginapi.Device {
-	n, err := dcmi.GetDeviceCount()
+	cards, err := dcmi.GetCardList()
 	check(err)
 
 	var devs []*pluginapi.Device
-	for i := uint(0); i < n; i++ {
-		d, err := dcmi.NewDeviceLite(i)
+	for _, card := range cards {
 		check(err)
 		devs = append(devs, &pluginapi.Device{
-			ID:     d.UUID,
+			ID:     string(card),
 			Health: pluginapi.Healthy,
 		})
 	}
-
 	return devs
 }
 
 func getDevicesAndMap() ([]*pluginapi.Device, []*dcmi.Device) {
-	n, err := dcmi.GetDeviceCount()
+	cards, err := dcmi.GetCardList()
+
 	check(err)
 	var devsMap []*dcmi.Device
 	var devs []*pluginapi.Device
-	for i := uint(0); i < n; i++ {
-		d, err := dcmi.NewDeviceLite(i)
+	for _, card := range cards {
+
 		check(err)
 		devsMap = append(devsMap, d)
 		devs = append(devs, &pluginapi.Device{
-			ID:     d.UUID,
+			ID:     string(card),
 			Health: pluginapi.Healthy,
 		})
 	}
