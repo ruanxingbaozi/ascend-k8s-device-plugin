@@ -20,41 +20,41 @@
 
 #include <stddef.h>
 #include <dlfcn.h>
-#include "cndev_dl.h"
-#include "./include/cndev.h"
+#include "dcmi_dl.h"
+#include "./include/dcmi_interface_api.h"
 
 #define DLSYM(x, sym)                           \
 do {                                            \
     dlerror();                                  \
     x = dlsym(handle, #sym);                    \
     if (dlerror() != NULL) {                    \
-        return (CNDEV_ERROR_FUNCTION_NOT_FOUND); \
+        return (DCMI_ERROR_FUNCTION_NOT_FOUND); \
     }                                           \
 } while (0)
 
-typedef cndevRet_t (*cndevSym_t)();
+typedef dcmiRet_t (*dcmiSym_t)();
 
 static void *handle;
 
-cndevRet_t CNDEV_DL(cndevInit)(void)
+dcmiRet_t DCMI_DL(dcmiInit)(void)
 {
     handle = dlopen("libdcmi.so", RTLD_LAZY | RTLD_GLOBAL);
     if (handle == NULL) {
-        return (CNDEV_ERROR_UNINITIALIZED);
+        return (DCMI_ERROR_UNINITIALIZED);
     }
-    return (cndevInit(0));
+    return (dcmi_init());
 }
 
-cndevRet_t CNDEV_DL(cndevShutdown)(void)
+dcmiRet_t DCMI_DL(dcmiShutdown)(void)
 {
-    cndevRet_t r = cndevRelease();
-    if (r != CNDEV_SUCCESS) {
+    dcmiRet_t r = dcmiRelease();
+    if (r != DCMI_SUCCESS) {
         return (r);
     }
-    return (dlclose(handle) ? CNDEV_ERROR_UNKNOWN : CNDEV_SUCCESS);
+    return (dlclose(handle) ? DCMI_ERROR_UNKNOWN : DCMI_SUCCESS);
 }
 
-cndevRet_t CNDEV_DL(cndevRelease)(void)
+dcmiRet_t DCMI_DL(dcmiRelease)(void)
 {
-    return CNDEV_SUCCESS;
+    return DCMI_SUCCESS;
 }

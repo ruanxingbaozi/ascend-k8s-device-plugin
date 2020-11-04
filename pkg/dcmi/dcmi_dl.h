@@ -1,14 +1,14 @@
 // Copyright (c) 2015-2018, CAMBRICON CORPORATION. All rights reserved.
 
-#ifndef _CNDEV_DL_H_
-#define _CNDEV_DL_H_
+#ifndef _DCMI_DL_H_
+#define _DCMI_DL_H_
 
 #include "./include/dcmi_interface_api.h"
 
-#define CNDEV_DL(x) x##_dl
+#define DCMI_DL(x) x##_dl
 
-extern cndevRet_t  CNDEV_DL(dcmi_init)(void);
-extern cndevRet_t  CNDEV_DL(cndevShutdown)(void);
-extern cndevRet_t  CNDEV_DL(cndevRelease)(void);
-#endif // _CNDEV_DL_H_
+extern dcmiRet_t  DCMI_DL(dcmiInit)(void);
+extern dcmiRet_t  DCMI_DL(dcmiShutdown)(void);
+extern dcmiRet_t  DCMI_DL(dcmiRelease)(void);
+#endif // _DCMI_DL_H_
 

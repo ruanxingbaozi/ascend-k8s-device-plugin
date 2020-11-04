@@ -20,7 +20,7 @@
 
 package dcmi
 
-// #include "cndev_dl.h"
+// #include "dcmi_dl.h"
 import "C"
 
 type Device struct {
@@ -44,12 +44,6 @@ type DeviceStatus struct {
 	Utilization UtilizationInfo
 }
 
-type ProcessInfo struct {
-	Pid                uint
-	Command            string
-	PhysicalMemoryUsed uint64
-}
-
 func assert(err error) {
 	if err != nil {
 		panic(err)
@@ -57,76 +51,76 @@ func assert(err error) {
 }
 
 func Init() error {
-	return cndevInit()
+	return dcmiInit()
 }
 
 func GetDeviceCount() (uint, error) {
 	return deviceGetCount()
 }
 
-func NewDeviceLite(idx uint) (device *Device, err error) {
-	device = nil
-	h, err := deviceGetHandleByIndex(idx)
-
-	if err != nil {
-		return
-	}
-
-	uuid, err := h.deviceGetUUID()
-
-	if err != nil {
-		return
-	}
-
-	path := h.PATH
-	device = &Device{
-		handle: h,
-		UUID:   uuid,
-		Path:   path,
-	}
-	return
-}
-
-func (d *Device) DeviceHealthCheckState(delayTime int) (int, error) {
-	return d.handle.deviceHealthCheckState(delayTime)
-}
-
-func (d *Device) DeviceAllRunningProcessInfo() []*ProcessInfo {
-	pids, mems, err := d.handle.deviceProcessInfo()
-	assert(err)
-
-	processInfos := []*ProcessInfo{}
-	for i := 0; i < len(pids); i++ {
-		name, err := processName(pids[i])
-
-		if err != nil {
-			return processInfos
-		}
-		p := &ProcessInfo{
-			Pid:                pids[i],
-			Command:            name,
-			PhysicalMemoryUsed: mems[i],
-		}
-		processInfos = append(processInfos, p)
-	}
-	return processInfos
-}
-
-func (d *Device) Status() (status *DeviceStatus, err error) {
-	board_u, err := d.handle.deviceGetBoardUtilization()
-	assert(err)
-
-	_, devMem, err := d.handle.deviceGetMemoryInfo()
-	assert(err)
-
-	status = &DeviceStatus{
-		Memory: devMem,
-		Utilization: UtilizationInfo{
-			Board: board_u,
-		},
-	}
-	return
-}
+//func NewDeviceLite(idx uint) (device *Device, err error) {
+//	device = nil
+//	h, err := deviceGetHandleByIndex(idx)
+//
+//	if err != nil {
+//		return
+//	}
+//
+//	uuid, err := h.deviceGetUUID()
+//
+//	if err != nil {
+//		return
+//	}
+//
+//	path := h.PATH
+//	device = &Device{
+//		handle: h,
+//		UUID:   uuid,
+//		Path:   path,
+//	}
+//	return
+//}
+//
+//func (d *Device) DeviceHealthCheckState(delayTime int) (int, error) {
+//	return d.handle.deviceHealthCheckState(delayTime)
+//}
+//
+//func (d *Device) DeviceAllRunningProcessInfo() []*ProcessInfo {
+//	pids, mems, err := d.handle.deviceProcessInfo()
+//	assert(err)
+//
+//	processInfos := []*ProcessInfo{}
+//	for i := 0; i < len(pids); i++ {
+//		name, err := processName(pids[i])
+//
+//		if err != nil {
+//			return processInfos
+//		}
+//		p := &ProcessInfo{
+//			Pid:                pids[i],
+//			Command:            name,
+//			PhysicalMemoryUsed: mems[i],
+//		}
+//		processInfos = append(processInfos, p)
+//	}
+//	return processInfos
+//}
+//
+//func (d *Device) Status() (status *DeviceStatus, err error) {
+//	board_u, err := d.handle.deviceGetBoardUtilization()
+//	assert(err)
+//
+//	_, devMem, err := d.handle.deviceGetMemoryInfo()
+//	assert(err)
+//
+//	status = &DeviceStatus{
+//		Memory: devMem,
+//		Utilization: UtilizationInfo{
+//			Board: board_u,
+//		},
+//	}
+//	return
+//}
 
 func Shutdown() error {
 	return Release()

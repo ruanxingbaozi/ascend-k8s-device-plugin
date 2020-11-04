@@ -98,6 +98,19 @@ enum {
     DCMI_DEVICE_TYPE_NONE = 0xff
 };
 
+typedef enum {
+  DCMI_SUCCESS = 0,                       /**< No error */
+  DCMI_ERROR_NO_DRIVER = 1,               /**< No Driver */
+  DCMI_ERROR_LOW_DRIVER_VERSION = 2,      /**< Driver Version Low*/
+  DCMI_ERROR_UNSUPPORTED_API_VERSION = 3, /**< API Version is not support*/
+  DCMI_ERROR_UNINITIALIZED = 4,           /**< API not Initial*/
+  DCMI_ERROR_INVALID_ARGUMENT = 5,        /**< Invalid pointer*/
+  DCMI_ERROR_INVALID_DEVICE_ID = 6,       /**< Invalid device id*/
+  DCMI_ERROR_UNKNOWN = 7,                 /**< Unknown error*/
+  DCMI_ERROR_MALLOC = 8,                  /**< internal malloc fail*/
+  DCMI_ERROR_NOT_SUPPORTED = 10           /**< not supported*/
+} dcmiRet_t;
+
 int dcmi_init(void);
 int dcmi_get_card_num_list(int *card_num, int *card_list, int list_length);
 int dcmi_get_device_num_in_card(int card_id, int *device_num);
